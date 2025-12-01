@@ -1,0 +1,25 @@
+name: WeCom Notify System
+
+on:
+  schedule:
+    # 每 5 分钟运行一次（用于解决 GitHub Actions 延迟问题）
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run notification script
+        run: python3 notify.py
+        env:
+          WECHAT_WEBHOOK_KEY: ${{ secrets.WECHAT_WEBHOOK_KEY }}
+          MENTION_MOBILE_1: ${{ secrets.MENTION_MOBILE_1 }}
+          MENTION_MOBILE_2: ${{ secrets.MENTION_MOBILE_2 }}
+          MENTION_MOBILE_3: ${{ secrets.MENTION_MOBILE_3 }}
+          MENTION_MOBILE_4: ${{ secrets.MENTION_MOBILE_4 }}
+          MENTION_MOBILE_5: ${{ secrets.MENTION_MOBILE_5 }}
