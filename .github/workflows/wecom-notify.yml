@@ -2,14 +2,23 @@ name: WeCom Notify System
 
 on:
   schedule:
-    # 每 5 分钟运行一次（用于解决 GitHub Actions 延迟问题）
-    - cron: "*/5 * * * *"
+    # 每 5 分钟运行一次（确保 9:00 到 9:30 之间可以触发）
+    - cron: "*/5 1 * * *"  # 这个会在 UTC 时间的 01:00 到 01:30 之间每 5 分钟触发
   workflow_dispatch:
     inputs:
       test_mode:
         description: '是否开启测试模式'
         required: true
         default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      test_date:
+        description: '选择测试日期（格式：YYYY-MM-DD）'
+        required: true
+        默认: '${{ github.event.inputs.test_date }}'
+        type: string
 
 jobs:
   notify:
@@ -29,3 +38,4 @@ jobs:
           MENTION_MOBILE_4: ${{ secrets.MENTION_MOBILE_4 }}
           MENTION_MOBILE_5: ${{ secrets.MENTION_MOBILE_5 }}
           TEST_MODE: ${{ github.event.inputs.test_mode }}  # 从 workflow_dispatch 获取 test_mode
+          TEST_DATE: ${{ github.event.inputs.test_date }}  # 从 workflow_dispatch 获取 test_date
