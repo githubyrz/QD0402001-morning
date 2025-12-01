@@ -4,6 +4,7 @@ import requests
 
 WEBHOOK_KEY = os.getenv("WECHAT_WEBHOOK_KEY")
 TEST_MODE = os.getenv("TEST_MODE", "false").lower() == "true"  # 判断是否进入测试模式
+TEST_DATE = os.getenv("TEST_DATE")  # 获取传入的测试日期
 
 # 预留 @ 手机号（暂不启用）
 MENTION_MOBILES = [
@@ -20,6 +21,9 @@ WHITE_SHIFT_BASE = datetime.date(2025, 11, 28)
 def send_msg(lines):
     """发送消息（测试模式时只输出到日志）"""
     today = datetime.datetime.utcnow() + datetime.timedelta(hours=8)
+    if TEST_DATE:
+        # 使用测试日期
+        today = datetime.datetime.strptime(TEST_DATE, "%Y-%m-%d")
     date_str = today.strftime("%Y-%m-%d")
 
     content = f"工作提醒 {date_str}\n\n" + "\n".join(lines)
@@ -40,6 +44,7 @@ def send_msg(lines):
 
 
 def is_white_shift(dt: datetime.date) -> bool:
+    """判断是否白班日"""
     diff = (dt - WHITE_SHIFT_BASE).days % 4
     return diff == 0
 
@@ -105,12 +110,17 @@ if __name__ == "__main__":
     now = datetime.datetime.utcnow() + datetime.timedelta(hours=8)
     today = now.date()
 
+    if TEST_MODE:
+        # 测试模式下，不需要考虑时间窗口，直接继续执行
+        print("[TEST MODE] 正在测试...忽略时间窗口检查")
+    else:
+        # 非测试模式，进行时间窗口检查
+        if not in_9am_window(now):
+            print("Not in 9am window. Skip.")
+            exit(0)
+
     if not is_white_shift(today):
         print("Not white shift today. No reminders.")
-        exit(0)
-
-    if not in_9am_window(now):
-        print("Not in 9am window. Skip.")
         exit(0)
 
     tasks = build_tasks(today)
