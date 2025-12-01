@@ -1,0 +1,20 @@
+name: Closing Reminder
+
+on:
+  schedule:
+    # 每天 18:00 UTC = 北京时间 18:00
+    - cron: "0 10 * * *"  # 这个时间在 UTC 10:00 是北京时间 18:00
+  workflow_dispatch:
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run reminder script
+        run: python3 closing_reminder.py
+        env:
+          WECHAT_WEBHOOK_KEY: ${{ secrets.WECHAT_WEBHOOK_KEY }}  # 企业微信 Webhook Key
