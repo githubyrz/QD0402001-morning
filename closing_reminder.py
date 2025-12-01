@@ -4,7 +4,7 @@ import datetime
 
 # 从环境变量获取 Webhook Key
 WEBHOOK_KEY = os.getenv("WECHAT_WEBHOOK_KEY")
-TEST_MODE = os.getenv("TEST_MODE"， "false")。lower() == "true"  # 判断是否进入测试模式
+TEST_MODE = os.getenv("TEST_MODE", "false").lower() == "true"  # 判断是否进入测试模式
 TEST_DATE = os.getenv("TEST_DATE")  # 获取传入的测试日期
 
 def send_msg(content):
