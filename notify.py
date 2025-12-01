@@ -3,7 +3,9 @@ import datetime
 import requests
 
 WEBHOOK_KEY = os.getenv("WECHAT_WEBHOOK_KEY")
+TEST_MODE = os.getenv("TEST_MODE", "false").lower() == "true"  # 判断是否进入测试模式
 
+# 预留 @ 手机号（暂不启用）
 MENTION_MOBILES = [
     os.getenv("MENTION_MOBILE_1"),
     os.getenv("MENTION_MOBILE_2"),
@@ -12,24 +14,29 @@ MENTION_MOBILES = [
     os.getenv("MENTION_MOBILE_5"),
 ]
 
-# 白班基准日（你提供的）
 WHITE_SHIFT_BASE = datetime.date(2025, 11, 28)
 
 
 def send_msg(lines):
+    """发送消息（测试模式时只输出到日志）"""
     today = datetime.datetime.utcnow() + datetime.timedelta(hours=8)
     date_str = today.strftime("%Y-%m-%d")
 
     content = f"工作提醒 {date_str}\n\n" + "\n".join(lines)
 
-    url = f"https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key={WEBHOOK_KEY}"
-    payload = {
-        "msgtype": "text",
-        "text": {
-            "content": content
+    if TEST_MODE:
+        # 测试模式下，输出到日志
+        print(f"[TEST MODE] 消息内容: \n{content}")
+    else:
+        # 正式模式，发送到企业微信
+        url = f"https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key={WEBHOOK_KEY}"
+        payload = {
+            "msgtype": "text",
+            "text": {
+                "content": content
+            }
         }
-    }
-    requests.post(url, json=payload)
+        requests.post(url, json=payload)
 
 
 def is_white_shift(dt: datetime.date) -> bool:
