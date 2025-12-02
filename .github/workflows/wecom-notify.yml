@@ -1,9 +1,9 @@
 name: WeCom Notify System
 
 on:
+  # 每 2 分钟触发一次（UTC）
   schedule:
-    # 每 5 分钟运行一次（确保 9:00 到 9:30 之间可以触发）
-    - cron: "*/5 1 * * *"  # 这个会在 UTC 时间的 01:00 到 01:30 之间每 5 分钟触发
+    - cron: "*/2 * * * *"
   workflow_dispatch:
     inputs:
       test_mode:
@@ -15,18 +15,26 @@ on:
           - 'true'
           - 'false'
       test_date:
-        description: '选择测试日期（格式：YYYY-MM-DD）'
-        required: true
-        默认: '2025-12-01'  # 默认日期，你可以更改为需要的日期
+        description: '测试日期（YYYY-MM-DD），留空则使用当前日期'
+        required: false
+        default: ''
         type: string
+
+permissions:
+  contents: read
 
 jobs:
   notify:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
+      - name: Checkout repo
         uses: actions/checkout@v4
+
+      - name: Restore cache (to persist last-sent marker)
+        uses: actions/cache@v4
+        with:
+          path: .wecom_cache
+          key: wecom-notify-cache-v1
 
       - name: Run notification script
         run: python3 notify.py
@@ -37,5 +45,12 @@ jobs:
           MENTION_MOBILE_3: ${{ secrets.MENTION_MOBILE_3 }}
           MENTION_MOBILE_4: ${{ secrets.MENTION_MOBILE_4 }}
           MENTION_MOBILE_5: ${{ secrets.MENTION_MOBILE_5 }}
-          TEST_MODE: ${{ github.event.inputs.test_mode }}  # 从 workflow_dispatch 获取 test_mode
-          TEST_DATE: ${{ github.event.inputs.test_date }}  # 从 workflow_dispatch 获取 test_date
+          TEST_MODE: ${{ github.event.inputs.test_mode || 'false' }}
+          TEST_DATE: ${{ github.event.inputs.test_date || '' }}
+
+      - name: Save cache (actions/cache saves automatically if key same)
+        if: always()
+        uses: actions/cache@v4
+        with:
+          path: .wecom_cache
+          key: wecom-notify-cache-v1
