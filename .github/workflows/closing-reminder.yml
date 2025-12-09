@@ -14,6 +14,14 @@ on:
         options:
           - 'true'
           - 'false'
+      force_send:
+        description: '无视时间范围强制发送'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
 
 jobs:
   notify:
@@ -28,3 +36,4 @@ jobs:
         env:
           WECHAT_WEBHOOK_KEY: ${{ secrets.WECHAT_WEBHOOK_KEY }}  # 企业微信 Webhook Key
           TEST_MODE: ${{ github.event_name == 'schedule' && 'false' || github.event.inputs.test_mode }}  # 自动触发时关闭测试模式，手动触发时使用输入参数
+          FORCE_SEND: ${{ github.event_name == 'schedule' && 'false' || github.event.inputs.force_send }}  # 自动触发时不强制发送，手动触发时使用输入参数
