@@ -2,7 +2,7 @@ import os
 import datetime
 import requests
 
-WEBHOOK_KEY = os.getenv("WECHAT_WEBHOOK_KEY")  # 从环境变量中获取 Webhook Key
+WEBHOOK_KEY = os.getenv("WECHAT_WEBHOOK_KEY", "").strip() # 从环境变量中获取 Webhook Key
 
 def send_msg(content):
     """发送消息到企业微信"""
